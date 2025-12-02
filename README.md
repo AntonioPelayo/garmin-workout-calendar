@@ -10,3 +10,8 @@ Then run the ingestion script to filter for running activities and convert `.fit
 ```bash
 ./venv/bin/python -m scripts.fit_ingestion
 ```
+
+## Google Calendar Configuration
+Create a Google Cloud Project in the Google Cloud Console, enable the Google Calendar API, and create OAuth 2.0 credentials.
+Download the `credentials.json` file and place it in the root project directory.
+Finally test the calendar setup with Google's quickstart script.

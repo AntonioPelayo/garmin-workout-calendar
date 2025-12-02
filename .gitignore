@@ -3,3 +3,6 @@ admin/
 data/
 scripts/
 venv/
+
+credentials.json
+token.json
