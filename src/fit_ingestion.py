@@ -41,7 +41,13 @@ def ensure_directories(source_dir: Path, destination_dir: Path, mode: str) -> No
     if not source_dir.exists():
         raise FileNotFoundError(f"Source directory does not exist: {source_dir}")
     if mode == "replace" and destination_dir.exists():
-        shutil.rmtree(destination_dir)
+        # Dont delete .gitkeep
+        for item in destination_dir.iterdir():
+            if item.name != ".gitkeep":
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
     destination_dir.mkdir(parents=True, exist_ok=True)
 
 
