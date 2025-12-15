@@ -3,15 +3,20 @@
 A tool that exports your Garmin activities so you can view them directly in your calendar application.
 
 ## Usage
-### Data Ingestion
-Connect watch to computer and using an app such as "Android File Transfer" copy the `.fit` files from `GARMIN/ACTIVITY` to `data/garmin_fit_activities/`.
-
-Then run the ingestion script to filter for running activities and convert `.fit` files to parquet into `data/parquet_run_activities/`.
+The app is accessed via command line as:
 ```bash
-./venv/bin/python -m scripts.fit_ingestion
+./venv/bin/python -m src.app
 ```
 
-## Google Calendar Configuration
+### Adding Workout Data
+Connect watch to computer and using an app such as "Android File Transfer" copy the `.fit` files from `GARMIN/ACTIVITY` to `data/garmin_fit_activities/`.
+
+### Google Calendar Configuration
 Create a Google Cloud Project in the Google Cloud Console, enable the Google Calendar API, and create OAuth 2.0 credentials.
+
 Download the `credentials.json` file and place it in the root project directory.
-Finally test the calendar setup with Google's quickstart script.
+
+Test the calendar API setup with Google's Python quickstart script within the root directory.
+
+**You MUST delete** the `.readonly` text from the `SCOPES` variable in the quickstart script, a `token.json` file will be created after the successful run.
+Link: https://developers.google.com/workspace/calendar/api/quickstart/python

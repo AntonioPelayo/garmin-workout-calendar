@@ -4,5 +4,6 @@ data/
 scripts/
 venv/
 
+.DS_Store
 credentials.json
 token.json
