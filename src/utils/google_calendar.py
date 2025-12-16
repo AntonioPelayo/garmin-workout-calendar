@@ -79,11 +79,11 @@ def create_workout_event(
     calendar_id,
     start_time,
     end_time,
-    summary="",
+    title="",
     description="",
 ):
     event_body = {
-        "summary": summary,
+        "summary": title,
         "start": {"dateTime": start_time.isoformat(), "timeZone": "UTC"},
         "end": {"dateTime": end_time.isoformat(), "timeZone": "UTC"},
         "description": description

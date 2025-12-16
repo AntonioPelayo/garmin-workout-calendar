@@ -1,4 +1,7 @@
+from fitparse import FitFile
+
 from src.utils import activities as au
+from src.utils import fit as fu
 from src.utils import google_calendar as gcu
 from config import (
     GARMIN_FIT_ACTIVITIES_PATH,
@@ -13,20 +16,22 @@ def main():
         print("Garmin Workouts calendar does not exist. Creating...")
         gcu.create_workout_calendar(service)
 
-    activities_list = au.get_activities()
-    print(f"Found {len(list(activities_list))} activities in {GARMIN_FIT_ACTIVITIES_PATH}")
+    activities_list = list(au.get_activities())
+    latest_activity = sorted(activities_list)[-1]
+    fit_file = FitFile(str(latest_activity))
+    df = fu.fit_to_df(fit_file)
 
-    latest_activity = sorted(list(activities_list))
-    print(f"Latest activity: {latest_activity[-1]}")
-    start, end = au.activity_start_and_end(latest_activity[-1])
-    print(f"Start time: {start}\nEnd time: {end}")
+    activity_info = fu.extract_event_data(df)
+    distance_km = round(activity_info['distance'] / 1000, 2)
+    activity_type = f"{activity_info['sub_sport'].capitalize()} {activity_info['sport'].capitalize()}"
+    title = f"{distance_km}km {activity_type}"
 
     gcu.create_workout_event(
         service,
         calendar_id=gcu.get_calendar_id(service),
-        start_time=start,
-        end_time=end,
-        summary="summary",
+        start_time=activity_info['start_utc'],
+        end_time=activity_info['end_utc'],
+        title=title,
         description="description"
     )
 
