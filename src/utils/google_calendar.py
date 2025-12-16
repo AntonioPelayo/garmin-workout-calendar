@@ -10,6 +10,18 @@ from config import (
     GOOGLE_API_TOKEN_JSON_PATH
 )
 
+
+def create_activity_hash(
+    start_utc,
+    elapsed_time,
+    sport,
+    distance,
+):
+    from hashlib import sha1
+
+    return sha1(f"{start_utc}|{elapsed_time}|{sport}|{distance}".encode("utf-8")).hexdigest()
+
+
 def connect_to_google_calendar():
     if not GOOGLE_API_CREDENTIALS_JSON_PATH.exists():
         print(f"{GOOGLE_API_CREDENTIALS_JSON_PATH} does not exist.")
