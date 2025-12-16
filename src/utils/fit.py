@@ -111,6 +111,7 @@ def extract_event_data(df: pd.DataFrame) -> dict:
         'end_utc': df['timestamp'].max(),
         'elapsed_time': hhmmss,
         'distance': df['distance'].max(),
+        'elevation_gain': df['enhanced_altitude'].diff().fillna(0).clip(lower=0).cumsum().max(),
         'sport': df['sport'].iloc[0],
         'sub_sport': df['sub_sport'].iloc[0]
     }

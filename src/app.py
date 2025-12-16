@@ -4,7 +4,9 @@ from src.utils import activities as au
 from src.utils import fit as fu
 from src.utils import google_calendar as gcu
 from config import (
-    GARMIN_FIT_ACTIVITIES_PATH,
+    IMPERIAL_UNITS,
+    KM_TO_MI,
+    M_TO_FT
 )
 
 
@@ -22,9 +24,17 @@ def main():
     df = fu.fit_to_df(fit_file)
 
     activity_info = fu.extract_event_data(df)
-    distance_km = round(activity_info['distance'] / 1000, 2)
+    distance = round(activity_info['distance'] / 1000, 2)
     activity_type = f"{activity_info['sub_sport'].capitalize()} {activity_info['sport'].capitalize()}"
-    title = f"{distance_km}km {activity_type}"
+    title = f"{distance}km {activity_type}"
+    description = f"Elapsed time: {activity_info['elapsed_time']}<br>"
+    description += f"Elevation gain: {round(activity_info['elevation_gain'], 2)}m"
+
+    if IMPERIAL_UNITS:
+        distance= round((activity_info['distance'] / 1000) * KM_TO_MI, 2)
+        title = f"{distance}mi {activity_type}"
+        description = f"Elapsed time: {activity_info['elapsed_time']}<br>"
+        description += f"Elevation gain: {round(activity_info['elevation_gain'] * M_TO_FT)}ft"
 
     gcu.create_workout_event(
         service,
@@ -32,7 +42,7 @@ def main():
         start_time=activity_info['start_utc'],
         end_time=activity_info['end_utc'],
         title=title,
-        description="description"
+        description=description
     )
 
 
