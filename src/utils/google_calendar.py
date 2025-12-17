@@ -10,18 +10,6 @@ from config import (
     GOOGLE_API_TOKEN_JSON_PATH
 )
 
-
-def create_activity_hash(
-    start_utc,
-    elapsed_time,
-    sport,
-    distance,
-):
-    from hashlib import sha1
-
-    return sha1(f"{start_utc}|{elapsed_time}|{sport}|{distance}".encode("utf-8")).hexdigest()
-
-
 def connect_to_google_calendar():
     if not GOOGLE_API_CREDENTIALS_JSON_PATH.exists():
         print(f"{GOOGLE_API_CREDENTIALS_JSON_PATH} does not exist.")
@@ -55,6 +43,25 @@ def get_calendar_id(service, calendar_name="Garmin Workouts"):
     if calendar:
         return calendar.get("id")
     return None
+
+def get_calendar_events_on_date(service, calendar_id, date):
+    import datetime as dt
+    start_of_day = dt.datetime.combine(date, dt.time.min).isoformat() + 'Z'  # 'Z' indicates UTC time
+    end_of_day = dt.datetime.combine(date, dt.time.max).isoformat() + 'Z'
+
+    events_result = (
+        service.events()
+        .list(
+            calendarId=calendar_id,
+            timeMin=start_of_day,
+            timeMax=end_of_day,
+            singleEvents=True,
+            orderBy="startTime",
+        )
+        .execute()
+    )
+    events = events_result.get("items", [])
+    return events
 
 
 def workout_calendar_exists(service, calendar_name="Garmin Workouts"):
