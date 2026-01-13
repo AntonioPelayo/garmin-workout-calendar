@@ -24,6 +24,7 @@ def main():
     activities_list = list(au.get_activities())
     # TODO: for activity in activities_list:
     latest_activity = sorted(activities_list)[-1]
+
     fit_file = FitFile(str(latest_activity))
     df = fu.fit_to_df(fit_file)
 
@@ -37,23 +38,9 @@ def main():
     activity_date = activity_info['start_utc'].date()
 
     # Check if activity already exists in calendar
-    events_on_date = gcu.get_calendar_events_on_date(
-        service,
-        gcu.get_calendar_id(service, "Garmin Workouts"),
-        activity_date
-    )
-    for e in events_on_date:
-        hash = hu.get_event_hash(e)
-        if hash == "":
-            continue
-        print(f"Event: {e['summary']}, Hash: {hash}")
-
-        print(f"Latest activity hash: {activity_hash}")
-        if hash == activity_hash:
-            print("Activity already exists in calendar.")
-            return
-        else:
-            print("Activity does not exist in calendar. Creating event...")
+    if gcu.event_exists(service, "Garmin Workouts", activity_date, activity_hash):
+        print("Activity already exists in calendar.")
+        return
 
     # Prettyfy event details
     distance = round(activity_info['distance'] / 1000, 2)

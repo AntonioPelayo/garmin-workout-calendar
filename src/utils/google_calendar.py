@@ -4,12 +4,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from src.utils import hashing as hu
 from config import (
     GOOGLE_API_SCOPES,
     GOOGLE_API_CREDENTIALS_JSON_PATH,
     GOOGLE_API_TOKEN_JSON_PATH
 )
 
+# Google Calendar Connection Functions
 def connect_to_google_calendar():
     if not GOOGLE_API_CREDENTIALS_JSON_PATH.exists():
         print(f"{GOOGLE_API_CREDENTIALS_JSON_PATH} does not exist.")
@@ -38,11 +40,13 @@ def connect_to_google_calendar():
     return service
 
 
+# Calendar Utility Functions
 def get_calendar_id(service, calendar_name="Garmin Workouts"):
     calendar = workout_calendar_exists(service, calendar_name)
     if calendar:
         return calendar.get("id")
     return None
+
 
 def get_calendar_events_on_date(service, calendar_id, date):
     import datetime as dt
@@ -64,6 +68,19 @@ def get_calendar_events_on_date(service, calendar_id, date):
     return events
 
 
+def event_exists(service, calendar_name, activity_date, activity_hash):
+    calendar_id = get_calendar_id(service, calendar_name)
+    events = get_calendar_events_on_date(service, calendar_id, activity_date)
+    for event in events:
+        hash = hu.get_event_hash(event)
+        if hash == "":
+            continue
+        if hash == activity_hash:
+            return True
+    return False
+
+
+# Workout Calendar Functions
 def workout_calendar_exists(service, calendar_name="Garmin Workouts"):
     calendars = []
     page_token = None
