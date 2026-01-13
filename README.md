@@ -20,3 +20,6 @@ Test the calendar API setup with Google's Python quickstart script within the ro
 
 **You MUST delete** the `.readonly` text from the `SCOPES` variable in the quickstart script, a `token.json` file will be created after the successful run.
 Link: https://developers.google.com/workspace/calendar/api/quickstart/python
+
+#### Expired Tokens
+If your `token.json` expires, delete it and re-run the quickstart script to generate a new one.

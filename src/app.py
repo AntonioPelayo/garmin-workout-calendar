@@ -3,6 +3,7 @@ from fitparse import FitFile
 from src.utils import activities as au
 from src.utils import fit as fu
 from src.utils import google_calendar as gcu
+from src.utils import hashing as hu
 from config import (
     IMPERIAL_UNITS,
     KM_TO_MI,
@@ -12,24 +13,47 @@ from config import (
 
 def main():
     print("App is running.")
-
     service = gcu.connect_to_google_calendar()
+
+    # Ensure Garmin Workouts calendar exists
     if not gcu.workout_calendar_exists(service):
         print("Garmin Workouts calendar does not exist. Creating...")
         gcu.create_workout_calendar(service)
 
+    # Get latest activity
     activities_list = list(au.get_activities())
+    # TODO: for activity in activities_list:
     latest_activity = sorted(activities_list)[-1]
     fit_file = FitFile(str(latest_activity))
     df = fu.fit_to_df(fit_file)
 
     activity_info = fu.extract_event_data(df)
-    activity_hash = gcu.create_activity_hash(
+    activity_hash = hu.create_activity_hash(
         activity_info['start_utc'],
         activity_info['elapsed_time'],
         activity_info['sport'],
         activity_info['distance'],
     )
+    activity_date = activity_info['start_utc'].date()
+
+    # Check if activity already exists in calendar
+    events_on_date = gcu.get_calendar_events_on_date(
+        service,
+        gcu.get_calendar_id(service, "Garmin Workouts"),
+        activity_date
+    )
+    for e in events_on_date:
+        hash = hu.get_event_hash(e)
+        if hash == "":
+            continue
+        print(f"Event: {e['summary']}, Hash: {hash}")
+
+        print(f"Latest activity hash: {activity_hash}")
+        if hash == activity_hash:
+            print("Activity already exists in calendar.")
+            return
+        else:
+            print("Activity does not exist in calendar. Creating event...")
 
     # Prettyfy event details
     distance = round(activity_info['distance'] / 1000, 2)
@@ -54,6 +78,7 @@ def main():
         title=title,
         description=description
     )
+    print("Event created successfully.")
 
 
 if __name__ == "__main__":
