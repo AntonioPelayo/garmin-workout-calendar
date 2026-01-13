@@ -3,6 +3,7 @@ from typing import Union
 from fitparse import FitFile
 import pandas as pd
 
+from src.utils import hashing as hu
 from src.utils import time as tu
 
 EXPECTED_FIT_COLUMNS = [
@@ -109,9 +110,16 @@ def extract_event_data(df: pd.DataFrame) -> dict:
     return {
         'start_utc': df['timestamp'].min(),
         'end_utc': df['timestamp'].max(),
+        'date': df['timestamp'].min().date(),
         'elapsed_time': hhmmss,
-        'distance': df['distance'].max(),
-        'elevation_gain': df['enhanced_altitude'].diff().fillna(0).clip(lower=0).cumsum().max(),
+        'distance': df['distance'].max() if 'distance' in df else 0,
+        'elevation_gain': df['enhanced_altitude'].diff().fillna(0).clip(lower=0).cumsum().max() if 'enhanced_altitude' in df else 0,
         'sport': df['sport'].iloc[0],
-        'sub_sport': df['sub_sport'].iloc[0]
+        'sub_sport': df['sub_sport'].iloc[0],
+        'hash': hu.create_activity_hash(
+            df['timestamp'].min(), # start time
+            hhmmss, # elapsed time
+            df['sport'].iloc[0], # sport
+            df['distance'].max() if 'distance' in df else 0
+        )
     }

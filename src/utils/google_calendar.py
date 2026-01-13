@@ -8,7 +8,10 @@ from src.utils import hashing as hu
 from config import (
     GOOGLE_API_SCOPES,
     GOOGLE_API_CREDENTIALS_JSON_PATH,
-    GOOGLE_API_TOKEN_JSON_PATH
+    GOOGLE_API_TOKEN_JSON_PATH,
+    IMPERIAL_UNITS,
+    KM_TO_MI,
+    M_TO_FT
 )
 
 # Google Calendar Connection Functions
@@ -78,6 +81,38 @@ def event_exists(service, calendar_name, activity_date, activity_hash):
         if hash == activity_hash:
             return True
     return False
+
+
+def create_activity_event(
+    service,
+    activity_data,
+    calendar_name="Garmin Workouts",
+    imperial_units=IMPERIAL_UNITS
+):
+    distance_km = round(activity_data['distance'] / 1000, 2)
+    activity_type = f"{activity_data['sub_sport'].capitalize()} {activity_data['sport'].capitalize()}"
+    title = f"{distance_km}km {activity_type}"
+    description = f"Elapsed time: {activity_data['elapsed_time']}"
+    description += f"<br>Elevation gain: {round(activity_data['elevation_gain'], 2)}m"
+
+    if imperial_units:
+        distance_mi = round((activity_data['distance'] / 1000) * KM_TO_MI, 2)
+        title = f"{distance_mi}mi {activity_type}"
+        description = f"Elapsed time: {activity_data['elapsed_time']}"
+        description += f"<br>Elevation gain: {round(activity_data['elevation_gain'] * M_TO_FT)}ft"
+    description += f"<br>Activity hash: {activity_data['hash']}"
+
+    try:
+        create_workout_event(
+            service,
+            calendar_id=get_calendar_id(service, calendar_name),
+            start_time=activity_data['start_utc'],
+            end_time=activity_data['end_utc'],
+            title=title,
+            description=description
+        )
+    except Exception as e:
+        print(f"An error occurred while creating the event: {e}")
 
 
 # Workout Calendar Functions

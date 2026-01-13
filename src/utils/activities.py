@@ -5,12 +5,13 @@ from config import (
 )
 
 
-def get_activities():
+def get_activities(limit=10):
     if not GARMIN_FIT_ACTIVITIES_PATH.exists():
         print(f"{GARMIN_FIT_ACTIVITIES_PATH} does not exist.")
         return []
-    return GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit")
-
+    if limit is None:
+        return list(GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit"))
+    return list(GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit"))[:limit]
 
 def activity_start_and_end(activity_path):
     if type(activity_path) is not str:
