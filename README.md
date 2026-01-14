@@ -1,6 +1,6 @@
 # Garmin Workout Calendar
 
-A tool that exports your Garmin activities so you can view them directly in your calendar application.
+A tool that exports your recorded Garmin activities to your calendar application so that you can see how your training fits into real life.
 
 ## Usage
 The app is accessed via command line as:

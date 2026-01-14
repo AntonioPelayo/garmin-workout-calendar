@@ -5,13 +5,25 @@ from config import (
 )
 
 
-def get_activities(limit=10):
+def get_fit_activities(sorted=True, reversed=True, limit=10):
+    """
+    Retrieve FIT activities from the configured directory.
+
+    :param sorted: Sort activities, useful if dates are in filenames
+    :param reversed: Most recent first if True
+    :param limit: Limit number of activities returned or None for all
+    """
     if not GARMIN_FIT_ACTIVITIES_PATH.exists():
         print(f"{GARMIN_FIT_ACTIVITIES_PATH} does not exist.")
         return []
-    if limit is None:
-        return list(GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit"))
-    return list(GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit"))[:limit]
+
+    activities = list(GARMIN_FIT_ACTIVITIES_PATH.glob("*.fit"))
+
+    if sorted:
+        activities.sort(reverse=reversed)
+
+    return activities[:limit]
+
 
 def activity_start_and_end(activity_path):
     if type(activity_path) is not str:

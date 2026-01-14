@@ -14,7 +14,7 @@ def main():
         gcu.create_workout_calendar(service)
 
     # Get latest activity
-    activities_list = sorted(list(au.get_activities()), reverse=True)
+    activities_list = au.get_fit_activities()
 
     for activity in activities_list:
         fit_file = FitFile(str(activity))
