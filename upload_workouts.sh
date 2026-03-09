@@ -1,0 +1,1 @@
+./venv/bin/python -m src.app

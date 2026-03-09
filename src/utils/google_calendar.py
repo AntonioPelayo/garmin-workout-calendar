@@ -14,32 +14,54 @@ from config import (
     M_TO_FT
 )
 
-# Google Calendar Connection Functions
-def connect_to_google_calendar():
-    if not GOOGLE_API_CREDENTIALS_JSON_PATH.exists():
-        print(f"{GOOGLE_API_CREDENTIALS_JSON_PATH} does not exist.")
-        return
+def load_credentials(json_path=GOOGLE_API_CREDENTIALS_JSON_PATH):
+    if not json_path.exists():
+        print(f"{json_path} does not exist.")
+        return None
     elif GOOGLE_API_TOKEN_JSON_PATH.exists():
         creds = Credentials.from_authorized_user_file(
             GOOGLE_API_TOKEN_JSON_PATH, GOOGLE_API_SCOPES
         )
+        return creds
+    else:
+        print("No credentials found.")
+        return None
 
+
+def validate_credentials(creds):
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                GOOGLE_API_CREDENTIALS_JSON_PATH, GOOGLE_API_SCOPES
-            )
-            creds = flow.run_local_server(port=0)
-        with open(GOOGLE_API_TOKEN_JSON_PATH, "w") as token:
-            token.write(creds.to_json())
+        print("Credentials are not valid.")
+        try:
+            if creds.expired and creds.refresh_token:
+                print("Google API credentials expired. Refreshing...")
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    GOOGLE_API_CREDENTIALS_JSON_PATH, GOOGLE_API_SCOPES
+                )
+                creds = flow.run_local_server(port=0)
+            with open(GOOGLE_API_TOKEN_JSON_PATH, "w") as token:
+                token.write(creds.to_json())
+                print("Credentials have been refreshed and saved.")
+        except Exception as e:
+            print(f"An error occurred while refreshing credentials: {e}")
+            return False
+    return True
+
+
+# Google Calendar Connection Functions
+def connect_to_google_calendar():
+    creds = load_credentials()
+
+    if not validate_credentials(creds):
+        print("Failed to validate credentials.")
+        return None
 
     try:
         service = build("calendar", "v3", credentials=creds)
     except HttpError as error:
         print(f"An error occurred: {error}")
-
+        return None
     return service
 
 
