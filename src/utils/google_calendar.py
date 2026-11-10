@@ -93,8 +93,16 @@ def get_calendar_events_on_date(service, calendar_id, date):
     return events
 
 
-def event_exists(service, calendar_name, activity_date, activity_hash):
+def get_or_create_calendar_id(service, calendar_name="Garmin Workouts"):
+    """Return the workout calendar's ID, creating the calendar if it doesn't exist."""
     calendar_id = get_calendar_id(service, calendar_name)
+    if calendar_id:
+        return calendar_id
+    print(f"{calendar_name} calendar does not exist. Creating...")
+    return create_workout_calendar(service, calendar_name)
+
+
+def event_exists(service, calendar_id, activity_date, activity_hash):
     events = get_calendar_events_on_date(service, calendar_id, activity_date)
     for event in events:
         hash = hu.get_event_hash(event)
@@ -121,7 +129,7 @@ def get_activity_type(activity_data):
 def create_activity_event(
     service,
     activity_data,
-    calendar_name="Garmin Workouts",
+    calendar_id,
     imperial_units=IMPERIAL_UNITS
 ):
     distance_km = round(activity_data['distance'] / 1000, 2)
@@ -140,7 +148,7 @@ def create_activity_event(
     try:
         create_workout_event(
             service,
-            calendar_id=get_calendar_id(service, calendar_name),
+            calendar_id=calendar_id,
             start_time=activity_data['start_utc'],
             end_time=activity_data['end_utc'],
             title=title,
@@ -180,6 +188,7 @@ def create_workout_calendar(service, calendar_name="Garmin Workouts"):
     print(
         f'Created "{calendar_name}" calendar with id: {new_calendar.get("id")}'
     )
+    return new_calendar.get("id")
 
 def create_workout_event(
     service,

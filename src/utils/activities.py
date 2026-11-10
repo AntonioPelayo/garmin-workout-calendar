@@ -2,10 +2,11 @@ from fitparse import FitFile
 
 from config import (
     GARMIN_FIT_ACTIVITIES_PATH,
+    RECENT_ACTIVITIES_LIMIT,
 )
 
 
-def get_fit_activities(sorted=True, reversed=True, limit=10):
+def get_fit_activities(sorted=True, reversed=True, limit=RECENT_ACTIVITIES_LIMIT):
     """
     Retrieve FIT activities from the configured directory.
 

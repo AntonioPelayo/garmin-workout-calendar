@@ -11,10 +11,8 @@ def main():
         print("Could not connect to Google Calendar. Exiting.")
         return
 
-    # Ensure Garmin Workouts calendar exists
-    if not gcu.workout_calendar_exists(service):
-        print("Garmin Workouts calendar does not exist. Creating...")
-        gcu.create_workout_calendar(service)
+    # Look up (or create) the Garmin Workouts calendar once for all activities
+    calendar_id = gcu.get_or_create_calendar_id(service)
 
     # Get latest activity
     activities_list = au.get_fit_activities()
@@ -27,7 +25,7 @@ def main():
         # Check if activity already exists in calendar
         if gcu.event_exists(
             service,
-            "Garmin Workouts",
+            calendar_id,
             activity_data['date'],
             activity_data['hash']
         ):
@@ -37,6 +35,7 @@ def main():
         gcu.create_activity_event(
             service,
             activity_data,
+            calendar_id,
         )
         print(f"Event for {activity} created successfully.")
     print("Process completed.")

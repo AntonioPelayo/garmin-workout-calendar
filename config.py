@@ -3,7 +3,9 @@ from pathlib import Path
 # Data paths
 DATA_PATH = Path("data")
 GARMIN_FIT_ACTIVITIES_PATH = DATA_PATH / "garmin_fit_activities"
-PARQUET_ACTIVITIES_PATH = DATA_PATH / "parquet_activities"
+
+# Number of most recent local .fit activities to check against Google Calendar (None for all)
+RECENT_ACTIVITIES_LIMIT = 10
 
 # Garmin Personal API Key
 GARMIN_PERSONAL_API_KEY = "your_garmin_personal_api_key_here"
