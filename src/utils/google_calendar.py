@@ -144,7 +144,8 @@ def create_activity_event(
             start_time=activity_data['start_utc'],
             end_time=activity_data['end_utc'],
             title=title,
-            description=description
+            description=description,
+            location=activity_data.get('location', ''),
         )
     except Exception as e:
         print(f"An error occurred while creating the event: {e}")
@@ -187,6 +188,7 @@ def create_workout_event(
     end_time,
     title="",
     description="",
+    location="",
 ):
     event_body = {
         "summary": title,
@@ -194,6 +196,8 @@ def create_workout_event(
         "end": {"dateTime": end_time.isoformat(), "timeZone": "UTC"},
         "description": description
     }
+    if location:
+        event_body["location"] = location
 
     event = service.events().insert(calendarId=calendar_id, body=event_body).execute()
     print(f'Event created: {event.get("htmlLink")}')

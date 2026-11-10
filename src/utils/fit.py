@@ -4,6 +4,7 @@ from fitparse import FitFile
 import pandas as pd
 
 from src.utils import hashing as hu
+from src.utils import location as lu
 from src.utils import time as tu
 
 EXPECTED_FIT_COLUMNS = [
@@ -117,6 +118,7 @@ def extract_event_data(df: pd.DataFrame) -> dict:
         'elevation_gain': df['enhanced_altitude'].diff().fillna(0).clip(lower=0).cumsum().max() if 'enhanced_altitude' in df else 0,
         'sport': df['sport'].iloc[0],
         'sub_sport': df['sub_sport'].iloc[0],
+        'location': lu.start_location(df),
         'hash': hu.create_activity_hash(
             df['timestamp'].min(), # start time
             hhmmss, # elapsed time
