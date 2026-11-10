@@ -100,8 +100,9 @@ def extract_event_data(df: pd.DataFrame) -> dict:
     if df['sport'].iloc[0] == 'running':
         df['sport'] = 'run'
 
+    # Only label generic runs/rides as 'road'; other sports drop the generic sub sport
     if df['sub_sport'].iloc[0] == 'generic':
-        df['sub_sport'] = 'road'
+        df['sub_sport'] = 'road' if df['sport'].iloc[0] in ('run', 'cycling') else ''
 
     elapsed_seconds = tu.elapsed_seconds(df['timestamp'])
     elapsed_hours = tu.seconds_to_hours(elapsed_seconds)

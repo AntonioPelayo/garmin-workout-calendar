@@ -105,6 +105,19 @@ def event_exists(service, calendar_name, activity_date, activity_hash):
     return False
 
 
+def get_activity_type(activity_data):
+    """Build a readable activity label, e.g. 'Road Run', 'Hiking', 'Strength Training'."""
+    sport = activity_data['sport']
+    sub_sport = activity_data['sub_sport']
+
+    # Training sub sports already describe the activity (e.g. 'strength_training')
+    if sport == 'training' and sub_sport:
+        label = sub_sport
+    else:
+        label = f"{sub_sport} {sport}"
+    return label.replace('_', ' ').strip().title()
+
+
 def create_activity_event(
     service,
     activity_data,
@@ -112,14 +125,14 @@ def create_activity_event(
     imperial_units=IMPERIAL_UNITS
 ):
     distance_km = round(activity_data['distance'] / 1000, 2)
-    activity_type = f"{activity_data['sub_sport'].capitalize()} {activity_data['sport'].capitalize()}"
-    title = f"{distance_km}km {activity_type}"
+    activity_type = get_activity_type(activity_data)
+    title = f"{distance_km}km {activity_type}" if distance_km else activity_type
     description = f"Elapsed time: {activity_data['elapsed_time']}"
     description += f"<br>Elevation gain: {round(activity_data['elevation_gain'], 2)}m"
 
     if imperial_units:
         distance_mi = round((activity_data['distance'] / 1000) * KM_TO_MI, 2)
-        title = f"{distance_mi}mi {activity_type}"
+        title = f"{distance_mi}mi {activity_type}" if distance_mi else activity_type
         description = f"Elapsed time: {activity_data['elapsed_time']}"
         description += f"<br>Elevation gain: {round(activity_data['elevation_gain'] * M_TO_FT)}ft"
     description += f"<br>Activity hash: {activity_data['hash']}"
