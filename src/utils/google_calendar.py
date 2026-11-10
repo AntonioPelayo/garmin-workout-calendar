@@ -1,3 +1,6 @@
+from datetime import timezone
+from zoneinfo import ZoneInfo
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -154,6 +157,7 @@ def create_activity_event(
             title=title,
             description=description,
             location=activity_data.get('location', ''),
+            time_zone=activity_data.get('timezone', 'UTC'),
         )
     except Exception as e:
         print(f"An error occurred while creating the event: {e}")
@@ -190,6 +194,13 @@ def create_workout_calendar(service, calendar_name="Garmin Workouts"):
     )
     return new_calendar.get("id")
 
+def to_zone_iso(utc_time, time_zone):
+    """ISO timestamp with offset in `time_zone`, from a UTC (naive or aware) datetime."""
+    if utc_time.tzinfo is None:
+        utc_time = utc_time.replace(tzinfo=timezone.utc)
+    return utc_time.astimezone(ZoneInfo(time_zone)).isoformat()
+
+
 def create_workout_event(
     service,
     calendar_id,
@@ -198,11 +209,13 @@ def create_workout_event(
     title="",
     description="",
     location="",
+    time_zone="UTC",
 ):
+    """Create an event; start/end are UTC (naive or aware), shown in `time_zone`."""
     event_body = {
         "summary": title,
-        "start": {"dateTime": start_time.isoformat(), "timeZone": "UTC"},
-        "end": {"dateTime": end_time.isoformat(), "timeZone": "UTC"},
+        "start": {"dateTime": to_zone_iso(start_time, time_zone), "timeZone": time_zone},
+        "end": {"dateTime": to_zone_iso(end_time, time_zone), "timeZone": time_zone},
         "description": description
     }
     if location:

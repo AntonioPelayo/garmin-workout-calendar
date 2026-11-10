@@ -1,4 +1,8 @@
-"""Offline reverse geocoding of an activity's start point to 'City, ST'."""
+"""Offline lookup of an activity's start point: 'City, ST' and IANA time zone."""
+import os
+from functools import cache
+from pathlib import Path
+
 import pandas as pd
 
 SEMICIRCLES_TO_DEGREES = 180 / 2**31
@@ -50,3 +54,32 @@ def start_location(df: pd.DataFrame) -> str:
     # mode=1 is single-process; the default multiprocess mode is slower for one point
     place = rg.search([coords], mode=1, verbose=False)[0]
     return format_location(place)
+
+
+@cache
+def _timezone_finder():
+    from timezonefinder import TimezoneFinder  # lazy: loads its zone data on first use
+    return TimezoneFinder()
+
+
+def system_timezone() -> str:
+    """This computer's IANA time zone (e.g. 'America/Los_Angeles'), or 'UTC'."""
+    if os.environ.get("TZ"):
+        return os.environ["TZ"].lstrip(":")
+    localtime = Path("/etc/localtime")  # macOS/Linux symlink into the zoneinfo database
+    if localtime.is_symlink():
+        target = str(localtime.resolve())
+        if "zoneinfo/" in target:
+            return target.split("zoneinfo/", 1)[1]
+    return "UTC"
+
+
+def start_timezone(df: pd.DataFrame) -> str:
+    """IANA time zone at the activity's start; this computer's zone for no-GPS activities."""
+    coords = start_coordinates(df)
+    if coords is not None:
+        lat, lon = coords
+        tz = _timezone_finder().timezone_at(lat=lat, lng=lon)
+        if tz:
+            return tz
+    return system_timezone()

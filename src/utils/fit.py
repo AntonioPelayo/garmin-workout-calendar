@@ -119,6 +119,7 @@ def extract_event_data(df: pd.DataFrame) -> dict:
         'sport': df['sport'].iloc[0],
         'sub_sport': df['sub_sport'].iloc[0],
         'location': lu.start_location(df),
+        'timezone': lu.start_timezone(df),
         'hash': hu.create_activity_hash(
             df['timestamp'].min(), # start time
             hhmmss, # elapsed time
