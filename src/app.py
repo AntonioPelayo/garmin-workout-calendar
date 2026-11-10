@@ -7,6 +7,9 @@ from src.utils import google_calendar as gcu
 def main():
     print("App is running.")
     service = gcu.connect_to_google_calendar()
+    if not service:
+        print("Could not connect to Google Calendar. Exiting.")
+        return
 
     # Ensure Garmin Workouts calendar exists
     if not gcu.workout_calendar_exists(service):

@@ -3,15 +3,25 @@
 A tool that exports your recorded Garmin activities to your calendar application so that you can see how your training fits into real life.
 
 ## Usage
-The app is accessed via command line as:
+After setup to sync and add the events to your calendar in one step, run
 ```bash
-./venv/bin/python -m src.app
+./bin/sync_garmin.sh && ./bin/upload_workouts.sh
 ```
 
-### Adding Workout Data
+## Adding Workout Data
+### Garmin Personal API (recommended)
+Create a key at https://connect.garmin.com/app/settings/personalApiToken and export it (or set `GARMIN_PERSONAL_API_KEY` in `config.py`, but don't commit it):
+```bash
+export GARMIN_PERSONAL_API_KEY='your-key'
+./venv/bin/python -m src.utils.garmin               # new activities since your newest local file
+./venv/bin/python -m src.utils.garmin --since 2025-01-01
+```
+Files are saved to `data/garmin_fit_activities/` with the same names the watch uses (`YYYY-MM-DD-HH-MM-SS.fit`, local start time).
+
+### From the watch
 Connect watch to computer and using an app such as "Android File Transfer" copy the `.fit` files from `GARMIN/ACTIVITY` to `data/garmin_fit_activities/`.
 
-### Google Calendar Configuration
+## Google Calendar Configuration
 Create a Google Cloud Project in the Google Cloud Console, enable the Google Calendar API, and create OAuth 2.0 credentials.
 
 Download the `credentials.json` file and place it in the root project directory.
